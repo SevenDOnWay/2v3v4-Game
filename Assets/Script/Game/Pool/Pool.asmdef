@@ -1,0 +1,10 @@
+{
+	"name": "Pool",
+  "references": [
+    "Unity.InputSystem",
+    "Unity.TextMeshPro",
+    "Unity.ugui",
+    "VContainer"
+  ],
+  "autoReferenced": true
+}
