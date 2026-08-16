@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: CountItemSO
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: CountItemSO
+  m_GUID: 71805f5c47bdb3c479b0285e0429dfd7
+  m_SerializeEntries:
+  - m_GUID: 804c735a9a9e12146a5a13107e4d56af
+    m_Address: Assets/Script/Game/CountObject/SO
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CountItemSO
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 9e7821cf94d8fb843a9a0f767ef75b20, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: f7ac8d783082d72448b299e7f05e7f0d, type: 2}
+    m_SchemaDisplayOrder:
+    - CountItemSO_ContentDirectoryGroupSchema
+  m_IncludeInBuild: 1
+  m_IncludeInBuildMigrated: 1
