@@ -11,19 +11,19 @@ namespace Assets.Script.Game.CountObject {
         [SerializeField]
         private AssetLabelReference countItemLabel;
 
-        private AsyncOperationHandle<IList<CountItemSO>> loadHandle;
+        private AsyncOperationHandle<IList<AnimalSO>> loadHandle;
         private bool hasLoadHandle;
 
-        public async Task<IReadOnlyList<CountItemSO>> LoadSOAsync() {
+        public async Task<IReadOnlyList<AnimalSO>> LoadSOAsync() {
             // Already requested before.
             if ( hasLoadHandle ) {
                 if ( !loadHandle.IsDone ) await loadHandle.Task;
 
-                return (IReadOnlyList<CountItemSO>)(loadHandle.Status == AsyncOperationStatus.Succeeded ? loadHandle.Result : new List<CountItemSO>());
+                return (IReadOnlyList<AnimalSO>)(loadHandle.Status == AsyncOperationStatus.Succeeded ? loadHandle.Result : new List<AnimalSO>());
             }
 
             loadHandle =
-                Addressables.LoadAssetsAsync<CountItemSO>(
+                Addressables.LoadAssetsAsync<AnimalSO>(
                     countItemLabel.RuntimeKey,
                     null
                 );
@@ -33,11 +33,11 @@ namespace Assets.Script.Game.CountObject {
             await loadHandle.Task;
 
             if ( loadHandle.Status != AsyncOperationStatus.Succeeded ) {
-                Debug.LogError("Failed to load CountItemSO assets.");
-                return new List<CountItemSO>();
+                Debug.LogError("Failed to load AnimalSO assets.");
+                return new List<AnimalSO>();
             }
 
-            return (IReadOnlyList<CountItemSO>)loadHandle.Result;
+            return (IReadOnlyList<AnimalSO>)loadHandle.Result;
         }
 
         private void OnDestroy() {

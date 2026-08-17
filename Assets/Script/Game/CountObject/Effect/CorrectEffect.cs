@@ -31,7 +31,7 @@ namespace Assets.Script.Game.CountObject.Effect {
             }
 
             // Stay glowing.
-            sequence.AppendInterval(0.2f);
+            sequence.AppendInterval(0.1f);
 
             // Scale up.
             sequence.Append(
@@ -40,7 +40,7 @@ namespace Assets.Script.Game.CountObject.Effect {
 
             // Scale back down.
             sequence.Append(
-                transform.DOScale(originalScale, 0.3f).SetEase(Ease.InOutSine)
+                transform.DOScale(originalScale, 0.15f).SetEase(Ease.InOutSine)
             );
 
             // Remove glow from all renderers.

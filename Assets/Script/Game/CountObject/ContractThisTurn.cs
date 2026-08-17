@@ -5,16 +5,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Script.Game.CountObject {
-    public class ThisTurnContract : MonoBehaviour {
-
-        
+    public class ContractThisTurn : MonoBehaviour {
 
         Dictionary<Vector2Int, int> grid = new();
 
-        List<CountItemSO> itemThisTurn = new(); //SO type of this , TODO: rename
-        Dictionary<int, List<GameObject>> gameObjectThisTurn = new(); //list of gameobject use for relase to object pool, TODO: rename
+        Dictionary<AnimalSO, List<GameObject>> gameObjectThisTurn = new(); //list of gameobject use for relase to object pool, TODO: rename
 
-        
         public void ApplyEffct() {
             for(int i  =  0; i < 5; i++ ) {
                 for(int j = 0; j < 5; j++ ) {
@@ -24,7 +20,8 @@ namespace Assets.Script.Game.CountObject {
                 }
             }
         }
-        
+
+
 
 
     }
@@ -35,7 +32,7 @@ namespace Assets.Script.Game.CountObject {
 
         public int id;
         public GameObject gameObject;
-        public CountItemSO countItemSO;
+        public AnimalSO countItemSO;
         public CorrectEffect correctEffect;
 
     }

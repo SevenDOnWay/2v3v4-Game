@@ -1,9 +1,5 @@
-﻿using Codice.CM.Common;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
 
 namespace Assets.Script.Game.CountObject {
@@ -13,11 +9,11 @@ namespace Assets.Script.Game.CountObject {
 
         [SerializeField] Transform poolRoot;
 
-        private readonly Dictionary<CountItemSO, Stack<GameObject>> poolDictionary = new();
-        private readonly Dictionary<CountItemSO, Transform> rootDictionary = new();
+        private readonly Dictionary<AnimalSO, Stack<GameObject>> poolDictionary = new();
+        private readonly Dictionary<AnimalSO, Transform> rootDictionary = new();
 
         //Commnet this if not using with addressable.
-        IReadOnlyList<CountItemSO> loadedSO;
+        IReadOnlyList<AnimalSO> loadedSO;
 
         [Inject]
         void Construct( AddressableLoader addressableLoader ) {
@@ -35,7 +31,7 @@ namespace Assets.Script.Game.CountObject {
 
 
         private void InitializePools() {
-            foreach ( CountItemSO item in loadedSO ) {
+            foreach ( AnimalSO item in loadedSO ) {
                 poolDictionary[item] = new Stack<GameObject>();
 
                 GameObject root = new GameObject($"{item.name}_Pool");
@@ -46,7 +42,7 @@ namespace Assets.Script.Game.CountObject {
         }
 
 
-        public List<GameObject> Get( CountItemSO countItemSO, int number = 1 ) {
+        public List<GameObject> Get( AnimalSO countItemSO, int number = 1 ) {
             Transform speciesRoot = GetOrCreateSpeciesRoot(countItemSO);
             Stack<GameObject> stack = GetOrCreateStack(countItemSO);
 
@@ -71,7 +67,7 @@ namespace Assets.Script.Game.CountObject {
             return instances;
         }
 
-        public void Release( GameObject instance, CountItemSO CountItemSO ) {
+        public void Release( GameObject instance, AnimalSO CountItemSO ) {
             if ( instance == null ) return;
 
             Transform speciesRoot = GetOrCreateSpeciesRoot(CountItemSO);
@@ -82,7 +78,21 @@ namespace Assets.Script.Game.CountObject {
             stack.Push(instance);
         }
 
-        private Stack<GameObject> GetOrCreateStack( CountItemSO CountItemSO ) {
+        public void Release( List<GameObject> instances, AnimalSO CountItemSO ) {
+            if ( instances == null ) return;
+
+            Transform speciesRoot = GetOrCreateSpeciesRoot(CountItemSO);
+            Stack<GameObject> stack = GetOrCreateStack(CountItemSO);
+
+            foreach ( var instance in instances ) {
+                instance.SetActive(false);
+                instance.transform.SetParent(speciesRoot, false);
+                stack.Push(instance);
+            }
+        }
+
+
+        private Stack<GameObject> GetOrCreateStack( AnimalSO CountItemSO ) {
             if ( !poolDictionary.TryGetValue(CountItemSO, out Stack<GameObject> stack) ) {
                 stack = new Stack<GameObject>();
                 poolDictionary[CountItemSO] = stack;
@@ -90,7 +100,7 @@ namespace Assets.Script.Game.CountObject {
             return stack;
         }
 
-        private Transform GetOrCreateSpeciesRoot( CountItemSO CountItemSO ) {
+        private Transform GetOrCreateSpeciesRoot( AnimalSO CountItemSO ) {
             if ( !rootDictionary.TryGetValue(CountItemSO, out Transform speciesRoot) || speciesRoot == null ) {
                 GameObject groupObj = new GameObject($"{CountItemSO}_Pool");
                 groupObj.transform.position = new Vector3(100, 100, 100); //set pool to out of the screen
