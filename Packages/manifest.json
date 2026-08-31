@@ -1,5 +1,11 @@
 {
   "dependencies": {
+<<<<<<< Updated upstream
+=======
+    "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.1.0",
+    "com.unity.addressables": "4.0.0",
+>>>>>>> Stashed changes
     "com.unity.ai.navigation": "2.0.10",
     "com.unity.collab-proxy": "2.11.3",
     "com.unity.ide.rider": "3.0.39",

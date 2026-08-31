@@ -21,7 +21,16 @@
   <Project Path="Unity.Rider.Editor.csproj" />
   <Project Path="Unity.VisualScripting.State.csproj" />
   <Project Path="Unity.AI.Navigation.Updater.csproj" />
+<<<<<<< Updated upstream
   <Project Path="Unity.AI.Navigation.Editor.csproj" />
+=======
+  <Project Path="CountObject.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Unity.AI.Navigation.Editor.csproj" />
+  <Project Path="DOTween.Modules.csproj" />
+  <Project Path="Unity.ProBuilder.KdTree.csproj" />
+  <Project Path="Unity.ProBuilder.AddOns.Editor.csproj" />
+>>>>>>> Stashed changes
   <Project Path="Unity.InputSystem.ForUI.csproj" />
   <Project Path="Unity.AI.Navigation.csproj" />
   <Project Path="Unity.Collections.CodeGen.csproj" />
