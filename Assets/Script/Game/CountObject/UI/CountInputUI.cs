@@ -17,7 +17,12 @@ namespace Assets.Script.Game.CountObject.UI {
             decreaseBtn?.onClick.AddListener(Decrease);
         }
 
-        void Increase() { 
+        void OnDisable() {
+            increaseBtn?.onClick.RemoveListener(Increase);
+            decreaseBtn?.onClick.RemoveListener(Decrease);
+        }
+
+        void Increase() {
             count++;
             UpdateText();
         }
@@ -30,7 +35,7 @@ namespace Assets.Script.Game.CountObject.UI {
         }
 
 
-        void UpdateText() {
+        public void UpdateText() {
             text.text = count.ToString();
         }
     }

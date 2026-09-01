@@ -1,14 +1,10 @@
-﻿using Assets.Script.Game.CountObject.Effect;
-using Assets.Script.Game.CountObject.UI;
+﻿using Assets.Script.Game.CountObject.UI;
 using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using TMPro;
-using Unity.VisualScripting.YamlDotNet.Core;
 using UnityEngine;
 using VContainer;
 using Cysharp.Threading.Tasks;
@@ -20,6 +16,15 @@ namespace Assets.Script.Game.CountObject {
             ObjectMoving,
             WaitingUserInput,
             ShowResult
+        }
+
+        [Serializable]
+        class TurnProperty {
+            [SerializeField, Min(0)] public int turn;
+            [SerializeField] public int minAnimalType;
+            [SerializeField] public int maxAnimalType;
+            [SerializeField] public int minAnimalPerType;
+            [SerializeField] public int maxAnimalPerType;
         }
 
         [Header("Inject")]
@@ -40,20 +45,44 @@ namespace Assets.Script.Game.CountObject {
         int currentTurn = 1;
         int maxTurn = 5;
 
-        [SerializeField] Dictionary<int, float> timeStayDictionary = new Dictionary<int, float>{ { 1, 5f}, {2,6f}, { 3, 5.5f } };
-        [SerializeField] Dictionary<int, float> timeInAndOutDictionary = new Dictionary<int, float>{{1, 3f}, {2, 2.8f}, {3, 2.5f} };
-        [SerializeField] Dictionary<int, int> timeReadingInputDictionary = new Dictionary<int, int>{{1, 10_000} , { 2, 9_500}, { 3, 9_000} }; //value is in ms
+        [SerializeField]
+        Dictionary<int, float> timeStayDictionary = new Dictionary<int, float>{
+                                                                            { 1, 5.0f },
+                                                                            { 2, 4.5f },
+                                                                            { 3, 4.0f },
+                                                                            { 4, 3.5f },
+                                                                            { 5, 3.0f }
+                                                                            };
+        [SerializeField]
+        Dictionary<int, float> timeInAndOutDictionary = new Dictionary<int, float>{
+                                                                                    { 1, 3.0f },
+                                                                                    { 2, 2.7f },
+                                                                                    { 3, 2.4f },
+                                                                                    { 4, 2.1f },
+                                                                                    { 5, 1.8f }
+                                                                                    };
+        [SerializeField]
+        Dictionary<int, int> timeReadingInputDictionary = new Dictionary<int, int>{
+                                                                                    { 1, 10_000 },
+                                                                                    { 2, 9_000 },
+                                                                                    { 3, 8_000 },
+                                                                                    { 4, 7_000 },
+                                                                                    { 5, 6_000 }
+                                                                                    }; //value is in ms
+        [SerializeField] List<TurnProperty> turnProperty;
         [SerializeField] List<Vector3> definedPosition;
 
         Vector3 startPosition;
         Vector3 endPosition;
 
+        bool isSetUpScreenForInput;
+
         [SerializeField] int TimeBetweenTurn;
 
-        List<CountInputUI> list = new();
-        IReadOnlyList<CountItemSO> items;
+        List<CountInputUI> inputUiList = new();
+        IReadOnlyList<AnimalSO> animalSO;
 
-        List<CountItemSO> itemThisTurn = new(); //SO type of this , TODO: rename
+        List<AnimalSO> animalThisTurn = new(); //SO type of this , TODO: rename
         Dictionary<int, List<GameObject>> gameObjectThisTurn = new(); //list of gameobject use for relase to object pool, TODO: rename
 
 
@@ -70,39 +99,52 @@ namespace Assets.Script.Game.CountObject {
             this.clockUI = clockUI;
         }
 
-        async Task Start() {
-            items = await addressableLoader.LoadSOAsync();
+        async void Start() {
+            animalSO = await addressableLoader.LoadSOAsync();
+
+
         }
 
+
+        //TODO: refactor this to synchronous code, async is no need
         public async Task StartGame() {
 
-            while ( currentTurn < maxTurn ) {
-                //StartCoroutine(WaitingForSecond(TimeBetweenTurn));
+            try {
+                while ( currentTurn < maxTurn ) {
+                    Debug.Log($"--- START TURN {currentTurn} ---");
 
-                Debug.Log($"--- START TURN {currentTurn} ---");
+                    await UniTask.Delay(TimeSpan.FromMilliseconds(TimeBetweenTurn));
+                    //StartCoroutine(WaitingForSecond(TimeBetweenTurn));
 
-                await UniTask.Delay(TimeSpan.FromMilliseconds(TimeBetweenTurn));
+                    Debug.Log("done waiting");
 
-                Debug.Log("done waiting");
+                    RandomNumberObject();
 
-                RandomNumberObject();
+                    Debug.Log("get random object");
 
-                Debug.Log("get random object");
+                    await MoveGrid();
+                    Debug.Log("move grid done");
 
-                await MoveGrid();
-                Debug.Log("move grid done");
+                    var item = GetRandomObjectThisTurn();
 
-                var item = GetRandomObjectThisTurn();
+                    await ShowQuestion(item.name);
 
-                await ShowQuestion(item.name);
+                    await ShowingResult(item.id);
 
-                await ShowingResult(item.id);
+                    EndTurn();
 
-                currentTurn++;
-                Debug.Log($"current increase {currentTurn}");
+                    currentTurn++;
+                    Debug.Log($"current increase {currentTurn}");
+                }
+            }
+
+            catch ( Exception e ) {
+                Debug.LogException(e);
             }
 
         }
+
+
 
 
 
@@ -115,30 +157,41 @@ namespace Assets.Script.Game.CountObject {
 
         //TODO: use wave to increase difficulty.
         void RandomNumberObject() {
-            int n = UnityEngine.Random.Range(5, 25); //25 is max item grid can hold, 5 is min for now
+            var turn = turnProperty[currentTurn - 1];
 
-            while ( n > 0 ) {
-                CountItemSO countItemSO =  GetRandomItem();
-                if ( !itemThisTurn.Contains(countItemSO) ) {
-                    itemThisTurn.Add(countItemSO);
-                    int amount = UnityEngine.Random.Range(1, n  + 1);
-                    n -= amount;
+            List<AnimalSO> availAnimalSO = new(animalSO);
+            int n = 0;
 
-                    var list = objectPooling.Get(countItemSO, amount);
+            int animalType = UnityEngine.Random.Range(turn.minAnimalType, turn.maxAnimalType);
 
+            while ( animalType > 0 ) {
+                if ( n >= 25 ) break;
 
-                    gameObjectThisTurn.Add(countItemSO.id, list);
-                    SpawnObject(amount, list, countItemSO);
+                AnimalSO animalSO =  GetRandomAnimal(availAnimalSO);
+
+                if ( !animalThisTurn.Contains(animalSO) ) {
+                    availAnimalSO.Remove(animalSO);
+                    animalThisTurn.Add(animalSO);
+
+                    int amount = UnityEngine.Random.Range(turn.minAnimalPerType, turn.maxAnimalPerType);
+                    amount = Mathf.Min(amount, 25 - n);
+                    n += amount;
+
+                    var list = objectPooling.Get(animalSO, amount);
+                    gameObjectThisTurn.Add(animalSO.id, list);
+                    SpawnObject(amount, list, animalSO);
                 }
+
+                animalType--;
             }
         }
 
-        CountItemSO GetRandomItem() {
-            int index = UnityEngine.Random.Range(0, items.Count);
-            return items[index];
+        AnimalSO GetRandomAnimal( List<AnimalSO> list ) {
+            int index = UnityEngine.Random.Range(0, list.Count);
+            return list[index];
         }
 
-        void SpawnObject( int amount, List<GameObject> gameObjects, CountItemSO countItemSO ) {
+        void SpawnObject( int amount, List<GameObject> gameObjects, AnimalSO countItemSO ) {
             gridScript.AddRandomOjbectToGrid(amount, gameObjects, countItemSO);
 
         }
@@ -184,23 +237,20 @@ namespace Assets.Script.Game.CountObject {
 
         //Time for gird move should decrese as turn increase
 
-        CountItemSO GetRandomObjectThisTurn() {
-            int index = UnityEngine.Random.Range(0, itemThisTurn.Count);
-            return itemThisTurn[index];
+        AnimalSO GetRandomObjectThisTurn() {
+            int index = UnityEngine.Random.Range(0, animalThisTurn.Count);
+            return animalThisTurn[index];
         }
 
         async Task ShowQuestion( string name ) {
 
             Debug.Log("Showing question right now");
 
+            SetUpScreen();
             panelInputUi.gameObject.SetActive(true);
-
             questionText.text = $"How Many {name} is there";
 
-            SetUpScreen();
-
             clockUI.StartTimer((float)timeReadingInputDictionary[currentTurn] / 1000); //convert ms to s
-
             await Task.Delay(timeReadingInputDictionary[currentTurn]);
 
             //Close screen reading input.
@@ -210,12 +260,15 @@ namespace Assets.Script.Game.CountObject {
 
         //read how many user to divide screen space for reading input
         void SetUpScreen() {
+            if ( isSetUpScreenForInput ) return;
+            isSetUpScreenForInput = true;
+
             int count = playerContract.GetPlayerCount();
 
             while ( count != 0 ) {
                 count--;
                 var temp = Instantiate(inputUI,panelInputUi.transform);
-                list.Add(temp.GetComponent<CountInputUI>());
+                inputUiList.Add(temp.GetComponent<CountInputUI>());
             }
         }
 
@@ -223,7 +276,7 @@ namespace Assets.Script.Game.CountObject {
         public List<int> GetInputResult() {
             List<int> res = new();
 
-            foreach ( var item in list ) {
+            foreach ( var item in inputUiList ) {
                 res.Add(item.count);
             }
 
@@ -274,6 +327,39 @@ namespace Assets.Script.Game.CountObject {
                          });
 
             return tcs.Task;
+        }
+
+        void EndTurn() {
+            ReleaseGameObject();
+            ClearlistThisTurn();
+            ResetCounterUI();
+            ResetGrid();
+        }
+
+        void ReleaseGameObject() {
+            foreach ( var kv in gameObjectThisTurn ) {
+                foreach ( var item in animalThisTurn ) {
+                    if ( gameObjectThisTurn.TryGetValue(item.id, out var list) ) {
+                        objectPooling.Release(list, item);
+                    }
+                }
+            }
+        }
+
+        void ClearlistThisTurn() {
+            animalThisTurn.Clear();
+            gameObjectThisTurn.Clear();
+        }
+
+        void ResetCounterUI() {
+            foreach ( var script in inputUiList ) {
+                script.count = 0;
+                script.UpdateText();
+            }
+        }
+
+        void ResetGrid() {
+            gridScript.ResetGrid();
         }
 
         IEnumerator WaitingForSecond( float second ) {

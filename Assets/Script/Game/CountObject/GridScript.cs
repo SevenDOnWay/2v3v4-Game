@@ -1,15 +1,9 @@
 using Assets.Script.Game.CountObject;
 using Assets.Script.Game.CountObject.Effect;
-using Codice.Client.BaseCommands;
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using VContainer;
-using static UnityEngine.UI.Image;
 
 public class GridScript : MonoBehaviour {
 
@@ -33,6 +27,9 @@ public class GridScript : MonoBehaviour {
 
 
     void InitializeGrid() {
+        grid.Clear();
+        emptyCell.Clear();
+
         for ( int i = 0; i < width; i++ ) {
             for ( int j = 0; j < height; j++ ) {
                 Vector2Int pos = new Vector2Int(i,j);
@@ -86,10 +83,10 @@ public class GridScript : MonoBehaviour {
 
     //    return res;
     //}
-    
+
 
     //BUG: some time there are some animal in the same cell
-    public void AddRandomOjbectToGrid( int amount, List<GameObject> gameObjects, CountItemSO countItemSO ) {
+    public void AddRandomOjbectToGrid( int amount, List<GameObject> gameObjects, AnimalSO countItemSO ) {
         for ( int i = 0; i < amount; i++ ) {
             int randomIndex = UnityEngine.Random.Range(0, emptyCell.Count - i);
 
@@ -99,13 +96,13 @@ public class GridScript : MonoBehaviour {
             int lastIndex = emptyCell.Count - i - 1;
 
             (emptyCell[randomIndex], emptyCell[lastIndex]) = (emptyCell[lastIndex], emptyCell[randomIndex]);
-            
+
         }
 
         emptyCell.RemoveRange(emptyCell.Count - amount, amount);
     }
 
-    public void SnapObjectToGrid( Vector2Int pos, GameObject gameObject, CountItemSO countItemSO ) {
+    public void SnapObjectToGrid( Vector2Int pos, GameObject gameObject, AnimalSO countItemSO ) {
         gameObject.transform.position = GridToWorld(pos);
 
         grid[pos] = new CellData() {
@@ -134,7 +131,7 @@ public class GridScript : MonoBehaviour {
 
                     tasks.Add(data.correctEffect.PlayCorrectEffect());
                     textResultUI.text = tasks.Count.ToString();
-                    await Task.Delay(300);
+                    await Task.Delay(150);
 
                 }
 
@@ -149,7 +146,9 @@ public class GridScript : MonoBehaviour {
         await Task.WhenAll(tasks);
     }
 
-
+    public void ResetGrid() {
+        InitializeGrid();
+    }
 
 
 }
