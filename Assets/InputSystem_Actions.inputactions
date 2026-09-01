@@ -991,6 +991,54 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Pool",
+            "id": "478bdbbc-8daa-4b3a-b977-765f9a5ae228",
+            "actions": [
+                {
+                    "name": "AimPosition",
+                    "type": "PassThrough",
+                    "id": "1c794d2a-0933-4e0c-9e4c-6ff2ed0fccfc",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "AimPress",
+                    "type": "Button",
+                    "id": "617be3e9-e301-40b7-a70f-a31334c6c0bf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "25319ffc-798f-46e5-98c2-1a21a310734a",
+                    "path": "<Pointer>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse;Touch;Gamepad",
+                    "action": "AimPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5c0cd5b5-a12a-4bac-8f49-5ac601302885",
+                    "path": "<Pointer>/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AimPress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
